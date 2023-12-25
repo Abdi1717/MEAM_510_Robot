@@ -32,10 +32,42 @@ Performance score. Do enough to get 50 pts for full marks. 65 pts are possible g
 - Autonomous move police 10"		(15pt partial credit: 8pt reaching box, +1pt for each inch pushed from original spot.)
 
 
-##### Black Beatle was able to get evertying besides Robot comms via ESP-Now resulting in 63/50 final score.Having ESP-Now and wifi proved a bit challenging which resulted in having one of them working by themselves but not together or we would get weird data when doing both.
+
 
 
 Black Beatle, the robot designed for the MEAM 510 project, featured a comprehensive set of functionalities for achieving its objectives. It was equipped with a PI controller and wheel encoders for precise movement control, allowing it to navigate accurately to specified locations on the field, with an interactive website providing real-time location data. Communication was handled via ESP-NOW, ensuring consistent data transfer despite initial Wi-Fi challenges. The robot autonomously followed walls using Time-of-Flight (ToF) sensors for maintaining safe distances. Two Vive trackers provided accurate positioning information, crucial for navigation and strategy. For trophy identification, Black Beatle employed a servo mechanism with phototransistors, enabling it to detect and retrieve trophies based on specific frequency signals. Additionally, the robot could autonomously locate and move a police car box, demonstrating its ability to execute complex tasks and apply controlled force as needed, with ToF sensors aiding in proximity determination.
+
+# Functionality
+Given the objectives and conditions of the game, our general approach was to control the robot using a website with the following functions:
+- A digital map representing the actual playing field for robot navigation
+- Real and fake trophy searching
+- Autonomous wall-following
+- Toggle grippers on/off
+- Push police car
+
+  
+## All functionalities and how they were achieved:
+### Control of Mobile Base to Reach Objects:
+Black Beatle was equipped with a PID controller integrated with wheel encoders. This setup provided precise control over speed and direction, enabling the robot to navigate accurately to the five designated on-field objects. Our website featured a digital field, which was mapped from the real-life field, and through it, you could click on a position and the robot would move to the corresponding real location. We received data from the Vive to get the location of the robot relative to the field, allowing us to know the robot’s exact location and orientation without needing to look at the field itself. The website map shows the location of the police car (via the router data) and the robot, along with the robot’s coordinates.
+
+### ESP-NOW Communication for Consistent Data Transfer:
+Despite initial challenges with Wi-Fi connectivity, our implementation of ESP-NOW for communication was crucial. It allowed Black Beatle to send and receive packets reliably with each communication instance. This continuous data exchange was essential for coordinating the robot's movements and actions in real time, ensuring seamless performance throughout the tasks.
+
+### Wall-Following Autonomy:
+For autonomous wall-following, we utilized ToF sensors on the robot’s front and side. These sensors provided distance readings from the walls, enabling Black Beatle to maintain a consistent and safe distance while navigating along the walls. When the robot approaches a certain distance away from the wall, it will drive slightly backwards and steer outwards. The PID functionality was integral for the robot to complete a full circuit around the field autonomously, as it allowed for the robot to move adequately away from the wall while still “following it.” The derivative part of the PID was especially important in having the robot make smooth corrections.
+
+### Vive System for Accurate Positioning:
+The robot used two Vive trackers, which were key in determining its exact position and orientation on the field. These trackers transmitted the robot's X-Y location via UDP broadcast every second, providing the necessary data for precision navigation and strategic placement in relation to the game objects. From that, we could establish a coordinate system ensuring that the robot could reach any point on the field reliably. The robot was equipped with two Vive trackers to not only capture its position, but also its orientation. On the software side, a line is formed with the two Vive tracker points, and when a location is marked, the robot will angle itself to be in line with the point before driving towards it. 
+
+### Trophy Identification and Retrieval:
+Black Beetle’s trophy search mechanism involved a servo with two phototransistors. This setup allowed the robot to sweep the area until both sensors had equal readings, indicating the trophy's location. The robot then aligned itself accordingly (aiming for a servo angle of 0) and moved towards the trophy. The ToF sensor was used to gauge proximity to the trophy, triggering the grabber mechanism at the right moment. This process was vital for distinguishing between the real trophy and the fake, using 550Hz and 23Hz beacon frequencies.
+
+### Moving the Police Car Box:
+The robot was programmed to autonomously locate and move to the police car box. Once in proximity, determined by the ToF sensor readings, Black Beatle applied the necessary force to push the box, ensuring it moved at least 10 inches. This task showcased the robot's capability to perform complex maneuvers and apply controlled force when needed.
+
+### What worked and what didn’t work:
+Everything worked on our system but sending packages with ESP-NOW which resulted in us getting a 63/50. Having ESP-Now and wifi proved a bit challenging which resulted in having one of them working by themselves but not together or we would get weird data when doing both.
+
 
 # Electrical Design
 
@@ -62,8 +94,27 @@ The last board is where most decisions are made. The other two boards mainly sen
 The website is an interactive map of the field that displays the location of the police car and the two vive sensors in real time. The user can click on the map and the robot will autonomously navigate to that point. It displaces the readings from both distance sensors and statuses for each action. It features buttons to toggle between the different actions the robot can take during the competition.
 
 
-# Mechinical Design
-<img src="https://github.com/jakedonnini/MEAM_510_Robot/assets/24221155/6ed553b1-15ea-4360-82b6-2eda69b07031" width="45%"></img> <img src="https://github.com/jakedonnini/MEAM_510_Robot/assets/24221155/8984bc85-2eea-4d53-8594-965e93021dd9" width="45%"></img> 
+# Mechanical Design
+
+## Frame
+The frame of the robot consists of three layers of 0.25” acrylic, which are stacked on top of eachother using standoffs. Starting from the bottom up, the first layer houses the 2 ESP32-C3’s (controlling the motors, ToF sensors, and IR phototransistors), the gripper structure, and time-of-flight distance sensors. The servo motors and the caster wheels are also attached to this base. Attached to the second layer is the beacon-finding servo and phototransistor structure and several perfboards connecting the circuits. Finally, the top layer houses the Vive trackers, which send the location of the robot at two points in order for us to determine robot location as well as orientation.
+
+<div align="center">
+    <img src="https://github.com/Abdi1717/MEAM_510_Robot/assets/24221155/0359c0e6-2546-45ea-8868-e9cc16d67fe2" alt="Top design">
+</div>
+
+
+## Gripper Structure
+The grippers are powered via an MG996R servo motor, and motion is transmitted to the other claw using gears. The servo is attached to a 3d-printed mount, and on its underside there is a ToF distance sensor in order to determine the robot’s front distance from the wall and trophies.
+
+
+<img src="https://github.com/Abdi1717/MEAM_510_Robot/assets/24221155/35fa44a0-d186-40f8-88df-21721b722451" width="45%"></img> <img src="https://github.com/Abdi1717/MEAM_510_Robot/assets/24221155/48425738-a3b2-46df-88c9-06d4ba6537ca" width="45%"></img> 
+
+## IR Scanner Structure
+The IR scanner sweeps the surroundings using an SG90 servo motor. The arm is attached to a thin panel separating the two IR phototransistors. The separation of the phototransistors in this way is crucial to our detection system.
+
+<img src="https://github.com/Abdi1717/MEAM_510_Robot/assets/24221155/f08c44e2-7d2e-4bf7-9949-954fb8a815b2" width="45%"></img> <img src="https://github.com/Abdi1717/MEAM_510_Robot/assets/24221155/91d59a60-8c59-4a85-abb5-0d4efda333c2" width="45%"></img> 
+
 
 
 # UI Design
@@ -74,7 +125,13 @@ The website is an interactive map of the field that displays the location of the
 </div>
 
 
+# PID Function
 
+<div align="center">
+    <img src="https://github.com/Abdi1717/MEAM_510_Robot/assets/24221155/f8329f5b-a19b-40cd-a461-0162c3b0cad1" alt="PID">
+</div>
+
+To get the PID controller to work we mapped out the RPS of the motors to PWM values and found functions that translate the two.
 
 # Robot Final Design
 
@@ -98,16 +155,78 @@ The website is an interactive map of the field that displays the location of the
 <img src="https://github.com/jakedonnini/MEAM_510_Robot/assets/24221155/dd5edef2-572c-4ea0-9a77-e553f91c13c9" width="45%"></img> <img src="https://github.com/jakedonnini/MEAM_510_Robot/assets/24221155/68c2552a-c8a8-459e-b69d-5c0b69a9d88c" width="45%"></img> <img src="https://github.com/jakedonnini/MEAM_510_Robot/assets/24221155/3110d174-1c1b-4f28-8e01-1cbb7e9e8d6c" width="45%"></img> <img src="https://github.com/jakedonnini/MEAM_510_Robot/assets/24221155/582b417c-8b75-4134-85dd-f09d9d7f0a0e" width="45%"></img> 
 
 
+# Bill of Materials
+<div align="center">
+
+| Quantity | Product | Link | Unit Cost | Total Cost |
+|----------|---------|------|-----------|------------|
+| 1        | MG996R servo motor | [Link](https://a.co/d/fwwtBwr) | $20.99 | $20.99 |
+| 2        | 6V DC motor with encoder and wheels | [Link](https://a.co/d/bmUqD89) | $19.15 | $38.30 |
+| 1        | VL53L0X TOF sensor | [Link](https://a.co/d/7BILPp3) | $9.99 | $9.99 |
+| 1        | 2 cell LiPo battery (purchased last lab) | [Link](https://a.co/d/6FUXKF0) | $16.92 | $16.92 |
+| 1        | Caster wheels | [Link](https://a.co/d/bK0Z9JW) | $6.99 | $6.99 |
+| 2        | 0.25" acrylic sheet | Supplied by RPL | $0 | $0 |
+| 1        | 0.125" acrylic sheet | Supplied by RPL | $0 | $0 |
+|          |         |      | Grand Total | $93.19 |
+
+</div>
+
+
+# Video of Robot
+
+Video of UI during Competition: https://drive.google.com/file/d/1AQmu_FXn1FKisQ_EzTf44Z2-oWu9fJfS/view?usp=drive_link
+Robot functionalities (all autonomous):
+
+Police car finding and pushing:
+https://drive.google.com/file/d/1e66Wrx3Amz-WSneGCqED4nHg9eY3CdbR/view?usp=sharing
+
+Trophy search:
+https://drive.google.com/file/d/1jjL6m83JAJZ-NY_DRQsCbKNYrPyRwJiF/view?usp=sharing
+
+Wall-following:
+https://drive.google.com/file/d/1eSuuxfysWur8YmAnl5r6YCQXDigigevD/view?usp=sharing
 
 
 
-# Areas for Improvement:
+## Retrospective
+Most important thing learned:
+Integration of Control Systems with Hardware and Software:
+The most significant learning from this project was understanding how the control system intricately interacts with both the hardware and software components. The use of Proportional-Integral (PI) controllers and various algorithms was crucial in enabling our robot, Black Beatle, to move efficiently and determine the best angles for maneuvering. This hands-on experience in troubleshooting and iterative development enhanced our practical skills, providing a deep insight into robotics engineering.
 
+Best parts of class:
+Designing the Software UI and System Integration:
+The highlight of the class was the opportunity to design the Software User Interface (UI) and work with the software that controls our robot's hardware, especially the mechanical design. The culmination of different systems - the electrical circuits, processor architecture, mechanical design, and the UI - working in unison was incredibly rewarding. It was a testament to our team's effort in creating a cohesive and functional robot.
+
+Most challenging aspects:
+Troubleshooting and Hardware/Software Bugs:
+The most challenging aspect was troubleshooting and identifying the root causes of various hardware and software bugs. For instance, we encountered issues with servo motors consuming excessive current, leading to the failure of two ESP32-C3 microcontrollers due to a short circuit. Additionally, programming the robot for autonomous movement and logical decision-making required substantial effort, especially in managing different movement actions like backing up or determining the most effective angles.
+
+
+Areas for Improvement:
 Servo Motor and Power Management:
 The issue with servo motors consuming excessive current and causing microcontroller failures highlights a need for better power management. Implementing current limiting circuits, using more robust microcontrollers capable of handling higher currents, or choosing different servo motors could mitigate these issues.
 
 Noise Management in Electrical Circuits:
 While precautions were taken to manage noise, particularly in the IR trophy-searching amplifier, there’s room for further improvement in noise reduction techniques. Implementing more robust filtering methods or redesigning certain circuit elements to minimize electromagnetic interference could improve the accuracy and reliability of the sensors.
+
+Alternative to ESP-NOW Communication:
+A significant area for improvement would be finding an alternative to the ESP-NOW communication protocol. Although it was a requirement, it introduced several challenges, including Wi-Fi connectivity issues, which were not crucial for the robot's operation. A more reliable and less intrusive communication method would have streamlined the process.
+
+Anything about the classes:
+Electrical and Mechanical Design Learning Curve:
+The project allowed us to delve deep into electrical and mechanical design aspects. Working with vive sensors, H-bridge motor drivers, IR scanning amplifiers, and time-of-flight sensors, among others, provided us with a comprehensive understanding of the complexities involved in robot design. The hands-on experience with circuit noise management and processor architecture, particularly the use of UDP for communication between ESP32 microcontrollers, was invaluable.
+
+Experience with User Interface Design:
+Developing an interactive web interface that displayed real-time locations and allowed users to control the robot remotely was a unique aspect of our project. This experience broadened our understanding of user-centric design and its importance in robotics.
+
+Team Collaboration:
+Working in a team with diverse skills was crucial in overcoming the numerous challenges we faced. The collaborative effort in designing, building, and programming Black Beatle underscored the importance of teamwork in engineering projects.
+
+
+Learning Through Failure:
+The iterative process of failing, rebuilding, and succeeding taught us resilience and the importance of a growth mindset in engineering.
+
+In summary, this project was a comprehensive learning experience, blending theory with practical skills in robotics. It not only honed our technical abilities but also enhanced our problem-solving, teamwork, and design thinking skills.
 
 
 
