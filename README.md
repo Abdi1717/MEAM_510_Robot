@@ -35,8 +35,6 @@ Performance score. Do enough to get 50 pts for full marks. 65 pts are possible g
 
 
 
-Black Beatle, the robot designed for the MEAM 510 project, featured a comprehensive set of functionalities for achieving its objectives. It was equipped with a PI controller and wheel encoders for precise movement control, allowing it to navigate accurately to specified locations on the field, with an interactive website providing real-time location data. Communication was handled via ESP-NOW, ensuring consistent data transfer despite initial Wi-Fi challenges. The robot autonomously followed walls using Time-of-Flight (ToF) sensors for maintaining safe distances. Two Vive trackers provided accurate positioning information, crucial for navigation and strategy. For trophy identification, Black Beatle employed a servo mechanism with phototransistors, enabling it to detect and retrieve trophies based on specific frequency signals. Additionally, the robot could autonomously locate and move a police car box, demonstrating its ability to execute complex tasks and apply controlled force as needed, with ToF sensors aiding in proximity determination.
-
 # Functionality
 Given the objectives and conditions of the game, our general approach was to control the robot using a website with the following functions:
 - A digital map representing the actual playing field for robot navigation
